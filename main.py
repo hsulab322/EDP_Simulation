@@ -79,9 +79,9 @@ def single_run_experiment(candidate):
             continue
 
         if data_type == data_type_list[0]:
-            folder_path = f'./simulation_data/candidate_criteria/player_alpha-{alpha}_beta-{beta}'
+            folder_path = f'./simulation_data/candidate_criteria/player-{candidate}_alpha-{alpha}_beta-{beta}'
         else:
-            folder_path = f'./simulation_data/real_subject/player_alpha-{alpha}_beta-{beta}'
+            folder_path = f'./simulation_data/real_subject/player-{subject_list[candidate]}_alpha-{alpha}_beta-{beta}'
 
         if not os.path.isdir(folder_path):
             os.makedirs(folder_path)  # Make directory if the directory is not found
@@ -102,6 +102,7 @@ if data_type == data_type_list[0]:  # Choose "criteria"
     data = pd.read_csv('./resource/candidate_criteria.csv')
 else:  # Choose "real_subject"
     data = pd.read_csv('./resource/subject-selecting.csv')
+    subject_list = data['subject']
 
 n_simulation = 100
 n_candidate = len(data)
