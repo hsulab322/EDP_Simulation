@@ -16,12 +16,8 @@ class Player:
         self.__current_incentive = float()
     
     # Produce loss outcome
-    def get_loss_outcome(self, game, ratio = None):
-        if ratio == None:
-            __ratio = game.get_ratio_list()[game.get_current_trial()]
-        else:
-            __ratio = ratio
-
+    def get_loss_outcome(self, game):
+        __ratio = game.get_ratio_list()[game.get_current_trial()]
         __gain_utility = (game.get_current_gain() / self.__max_gain)**self.__alpha
         __loss_utility = __gain_utility * __ratio
         __loss_outcome = round(-1 * self.__max_loss * __loss_utility **(1/self.__beta))
