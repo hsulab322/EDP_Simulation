@@ -78,7 +78,7 @@ def single_run_experiment(candidate):
         if df_append_index == 0:
             continue
 
-        if data_type == data_type_list[1]:
+        if data_type == data_type_list[0]:
             folder_path = f'./simulation_data/candidate_criteria/player_alpha-{alpha}_beta-{beta}'
         else:
             folder_path = f'./simulation_data/real_subject/player_alpha-{alpha}_beta-{beta}'
