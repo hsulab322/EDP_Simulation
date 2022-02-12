@@ -93,26 +93,27 @@ def single_run_experiment(candidate):
 task_type_list = ['whole_experiment', 'single_run_experiment']
 data_type_list = ['criteria', 'real_subject']
 
-# Set experiment type and how many times we want to simulate
-n_simulation = 100
-n_candidate = 288
-task_type = task_type_list[1]
-data_type = data_type_list[1]
+# Set the experiment type and the data type
+task_type = task_type_list[1]  # Choose to simulate the whole experiment or just one run
+data_type = data_type_list[1]  # Choose whether the alpha and beta come from real subject or be made up by "candidate_criteria.py"
 
 # Read candidate data
-if data_type == data_type_list[1]:
+if data_type == data_type_list[0]:  # Choose "criteria"
     data = pd.read_csv('./resource/candidate_criteria.csv')
-else:
+else:  # Choose "real_subject"
     data = pd.read_csv('./resource/subject-selecting.csv')
+
+n_simulation = 100
+n_candidate = len(data)
 
 # Run the simulation
 if __name__ == '__main__':
 
     # Mutliprocessing (using different cpu)
     pool = mp.Pool()
-    if task_type == task_type_list[0]:
+    if task_type == task_type_list[0]:  # Choose "whole_experiment"
         pool.map(whole_experiment, range(n_simulation))
-    else:
+    else:  # Choose "single_run_experiment"
         pool.map(single_run_experiment, range(n_candidate))
 
     # Inform us when the simulation is done
