@@ -72,9 +72,10 @@ class Game:
         gain = self.__current_gain
         loss = self.__current_loss
 
-        if loss == 0:
+        if loss == 0:  # Rule 1: loss-outcome equals to 0
             self.__conflict = False
-        elif gain / (-1*loss) > 5000:
+        elif self.__ratio_list[self.__current_trial] == 1 and loss/gain < 1/3:
+            # Rule 2: when gain utility and loss utility are the same, the loss-outcome is less than 1/3 of the gain-outcome
             self.__conflict = False
         else:
             self.__conflict = True
