@@ -40,8 +40,8 @@ def single_run_experiment(candidate):
 
         for index in range(n_simulation):
             # Create the game and the player
-            alpha = data.at[candidate, 'alpha']
-            beta = data.at[candidate, 'beta']
+            alpha = round(data.at[candidate, 'alpha'], 3)
+            beta = round(data.at[candidate, 'beta'], 3)
             player = Player(alpha, beta)
             game = Game(single_run = run_num)
             initial_value = game.get_initial_value_list()[run_num]
