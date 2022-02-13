@@ -4,7 +4,6 @@ import os
 import numpy as np
 from scipy import stats
 
-n_candidate = 18
 n_simulation = 100
 
 for candidate in range(n_candidate):
