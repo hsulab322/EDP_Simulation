@@ -60,7 +60,7 @@ class Game:
             self.__current_gain = initial_value
             self.__current_loss = player.get_loss_outcome(self)
             player.change_current_incentive(None)
-            player.change_current_chip(self.__current_gain)  # initial chip: equals to initial value
+            player.change_current_chip(self.__current_gain*2)  # initial chip: equals to initial value
         else:
             self.__current_gain = round(player.get_current_chip()*0.5 + self.__current_gain)
             self.__current_loss = player.get_loss_outcome(self)
@@ -68,14 +68,16 @@ class Game:
         return [self.__current_gain, self.__current_loss]
     
     # Check if the player confront with conflict
-    def check_conflict(self):
+    def check_conflict(self, player):
         gain = self.__current_gain
-        loss = self.__current_loss
+        loss = abs(self.__current_loss)
 
-        if loss == 0:  # Rule 1: loss-outcome equals to 0
+        if player.get_current_chip() <= 0:  # Rule 1: if the player is bankrupt, there is no need to check whether the player is conflict or not
+            self.__conflict = True
+        elif loss == 0:  # Rule 2: loss-outcome equals to 0 means the player may not feel conflict
             self.__conflict = False
         elif self.__ratio_list[self.__current_trial] == 1 and loss/gain < 1/3:
-            # Rule 2: when gain utility and loss utility are the same, the loss-outcome is less than 1/3 of the gain-outcome
+            # Rule 3: when gain utility and loss utility are the same, the loss-outcome is less than 1/3 of the gain-outcome
             self.__conflict = False
         else:
             self.__conflict = True
