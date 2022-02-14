@@ -53,7 +53,7 @@ def single_run_experiment(candidate):
             # Start the game
             while game.get_current_run() < game.get_n_run():
                 game.update_lottery(player)
-                if not game.check_conflict():
+                if not game.check_conflict(player):
                     game_break = True
                     break
 
