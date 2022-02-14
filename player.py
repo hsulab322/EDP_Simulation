@@ -15,14 +15,6 @@ class Player:
         self.__current_status = str()  # bankrupt or not
         self.__current_incentive = float()
     
-    # Produce loss outcome
-    def get_loss_outcome(self, game):
-        __ratio = game.get_ratio_list()[game.get_current_trial()]
-        __gain_utility = (game.get_current_gain() / self.__max_gain)**self.__alpha
-        __loss_utility = __gain_utility * __ratio
-        __loss_outcome = round(-1 * self.__max_loss * __loss_utility **(1/self.__beta))
-        return __loss_outcome
-    
     def action(self, game):
         # Bet strategy (unsolved)
         current_lottery = game.show_lottery(self)
@@ -36,6 +28,9 @@ class Player:
         return self.__current_bet_or_quit  # let True denote "bet"
     
     # Accecc to private properties
+    def get_utility_parameters(self):
+        return [self.__alpha, self.__beta, self.__max_gain, self.__max_loss]
+
     def get_current_probability(self):
         return self.__current_probability
     

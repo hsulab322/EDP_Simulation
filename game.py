@@ -52,14 +52,23 @@ class Game:
             self.__run_list = [self.__single_run]
             self.__n_run = 1
 
+    # Compute loss outcome
+    def __compute_loss_outcome(self, player):
+        __player_attributes_list = player.get_utility_parameters()
+        __ratio = self.__ratio_list[self.__current_trial]
+        __gain_utility = (self.__current_gain / __player_attributes_list[2])**__player_attributes_list[0]
+        __loss_utility = __gain_utility * __ratio
+        __loss_outcome = round(-1 * __player_attributes_list[3] * __loss_utility **(1/__player_attributes_list[1]))
+        return __loss_outcome
+
     # Start the game
     # Show lottery
     def show_lottery(self, player):
         if self.__current_trial == 0:
-            random_run_index = self.__run_list[self.__current_run]
-            initial_value = self.__initial_value_list[random_run_index]
-            self.__current_gain = initial_value
-            self.__current_loss = player.get_loss_outcome(self)
+            __random_run_index = self.__run_list[self.__current_run]
+            __initial_value = self.__initial_value_list[__random_run_index]
+            self.__current_gain = __initial_value
+            self.__current_loss = self.__compute_loss_outcome()
             player.change_current_incentive(None)
             player.change_current_chip(self.__current_gain*self.__initial_chip_ratio)  # initial chip: equals to initial value
         else:
@@ -153,21 +162,12 @@ class Game:
     def get_initial_value_list(self):
         return self.__initial_value_list
         
-    def get_ratio_list(self):
-        return self.__ratio_list
-
     def get_n_run(self):
         return self.__n_run
     
     def get_current_run(self):
         return self.__current_run
     
-    def get_current_trial(self):
-        return self.__current_trial
-    
-    def get_current_gain(self):
-        return self.__current_gain
-
     def get_result(self):
         return self.__x
     
