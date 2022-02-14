@@ -4,7 +4,7 @@ import random
  
 class Game:
     # Game's attributes
-    def __init__(self, base_value = 200, single_run = None):
+    def __init__(self, base_value = 200, single_run = None, initial_chip_ratio = 1):
         self.__base_value = base_value
         self.__initial_value_list = [self.__base_value + 100*i for i in range(0, 6)]*2
         self.__ratio_list = (0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5)
@@ -17,6 +17,7 @@ class Game:
         self.__current_trial = int()
         self.__current_gain = float()
         self.__current_loss = float()
+        self.__initial_chip_ratio = initial_chip_ratio
         self.__current_win_or_lose = str()
         self.__x = pd.DataFrame({  # Store trial data
             'Run':[],
@@ -60,7 +61,7 @@ class Game:
             self.__current_gain = initial_value
             self.__current_loss = player.get_loss_outcome(self)
             player.change_current_incentive(None)
-            player.change_current_chip(self.__current_gain*2)  # initial chip: equals to initial value
+            player.change_current_chip(self.__current_gain*self.__initial_chip_ratio)  # initial chip: equals to initial value
         else:
             self.__current_gain = round(player.get_current_chip()*0.5 + self.__current_gain)
             self.__current_loss = player.get_loss_outcome(self)

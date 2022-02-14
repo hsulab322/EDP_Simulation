@@ -43,7 +43,10 @@ def single_run_experiment(candidate):
             alpha = round(data.at[candidate, 'alpha'], 3)
             beta = round(data.at[candidate, 'beta'], 3)
             player = Player(alpha, beta)
-            game = Game(single_run = run_num)
+            if not less_initial_chip_amount:
+                game = Game(single_run = run_num, initial_chip_ratio = 1)
+            else:
+                game = Game(single_run = run_num)
             initial_value = game.get_initial_value_list()[run_num]
             game_break = False
 
@@ -96,6 +99,7 @@ data_type_list = ['criteria', 'real_subject']
 # Set the experiment type and the data type
 task_type = task_type_list[1]  # Choose to simulate the whole experiment or just one run
 data_type = data_type_list[1]  # Choose whether the alpha and beta come from real subject or be made up by "candidate_criteria.py"
+less_initial_chip_amount = False  # Let true denote that the initial chip in every run is as many as initial gain
 
 # Read candidate data
 if data_type == data_type_list[0]:  # Choose "criteria"
