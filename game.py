@@ -68,12 +68,12 @@ class Game:
             __random_run_index = self.__run_list[self.__current_run]
             __initial_value = self.__initial_value_list[__random_run_index]
             self.__current_gain = __initial_value
-            self.__current_loss = self.__compute_loss_outcome()
+            self.__current_loss = self.__compute_loss_outcome(player)
             player.change_current_incentive(None)
             player.change_current_chip(self.__current_gain*self.__initial_chip_ratio)  # initial chip: equals to initial value
         else:
             self.__current_gain = round(player.get_current_chip()*0.5 + self.__current_gain)
-            self.__current_loss = player.get_loss_outcome(self)
+            self.__current_loss = self.__compute_loss_outcome(player)
         
         return [self.__current_gain, self.__current_loss]
     
