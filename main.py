@@ -89,7 +89,7 @@ def single_run_experiment(candidate):
             folder_2 = 'more_initial_chip'
         
         # Decide the storage path
-            folder_path = f'./simulation_data/{folder_1}/{folder_2}/player-{player_id}_alpha-{alpha}_beta-{beta}_max_gain-{max_gain}_max_loss-{max_loss}'
+        folder_path = f'./simulation_data/{folder_1}/{folder_2}/player-{player_id}_alpha-{alpha}_beta-{beta}_max_gain-{max_gain}_max_loss-{max_loss}'
         if not os.path.isdir(folder_path):
             os.makedirs(folder_path)  # Make directory if the directory is not found
             
