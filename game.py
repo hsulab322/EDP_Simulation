@@ -107,20 +107,21 @@ class Game:
     
     # Save the current situation
     def __save_trial(self, player):
-        self.__x = self.__x.append({
-            'Run':self.__current_run,
-            'Trial':self.__current_trial,
-            'Gain_outcome':self.__current_gain_outcome,
-            'Loss_outcome':self.__current_loss_outcome,
-            'Gain_utility':self.__current_gain_utility,
-            'Loss_utility':self.__current_loss_utility,
-            'Probability':player.get_current_probability(),
-            'Conflict_or_not':self.__conflict,
-            'Bet_or_quit':player.get_current_bet_or_not(),
-            'Win_or_lose':self.__current_win_or_lose,
-            'Chip':player.get_current_chip(),
-            'Incentive':player.get_current_incentive()
-        }, ignore_index = True)
+        __current_trial_info = pd.DataFrame({
+            'Run':[self.__current_run],
+            'Trial':[self.__current_trial],
+            'Gain_outcome':[self.__current_gain_outcome],
+            'Loss_outcome':[self.__current_loss_outcome],
+            'Gain_utility':[self.__current_gain_utility],
+            'Loss_utility':[self.__current_loss_utility],
+            'Probability':[player.get_current_probability()],
+            'Conflict_or_not':[self.__conflict],
+            'Bet_or_quit':[player.get_current_bet_or_not()],
+            'Win_or_lose':[self.__current_win_or_lose],
+            'Chip':[player.get_current_chip()],
+            'Incentive':[player.get_current_incentive()]
+        })
+        self.__x = pd.concat([self.__x, __current_trial_info], ignore_index = True)
 
     # Check if the player is bankrupt
     def __check_bankrupt(self, player):
