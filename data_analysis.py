@@ -4,15 +4,16 @@ import os
 import numpy as np
 from scipy import stats
 
+# Set how many simulations, data type and initial chip setting
 n_simulation = 100
-path = './simulation_data/initial_chip_equals_to_initial_value'
+data_type_dic = {0:"candidate_criteria", 1:"real_subject"}
+chip_setting_dic = {0:"more_initial_chip", 1:"less_initial_chip"}
 
 # Run two types of data
 for chip_setting in range(2):
-    path = os.listdir('./simulation_data')[chip_setting]
-    for type in range(2):
-        type_path = os.listdir(f'./simulation_data/{path}')[type]
-        n_candidate = len(os.listdir(f'./simulation_data/{path}/{type_path}'))
+    for data_type in range(2):
+        simulation_data_path = f'./simulation_data/{data_type_dic[data_type]}/{chip_setting_dic[chip_setting]}'
+        n_candidate = len(os.listdir(simulation_data_path))
 
         for candidate in range(n_candidate):
             # Set up the dataframe before computing data from the first candidate
@@ -21,6 +22,9 @@ for chip_setting in range(2):
                     'ID':[],
                     'alpha':[],
                     'beta':[],
+                    'alpha - beta':[],
+                    'max_gain':[],
+                    'max_loss':[],
                     'n_simulation':[],
                     'initial_value':[],
                     'trial_1':[],
@@ -40,59 +44,79 @@ for chip_setting in range(2):
                 })
 
             # Get alpha & beta from the folder
-            player_path = os.listdir(f'./simulation_data/{path}/{type_path}')[candidate]
+            player_path = os.listdir(simulation_data_path)[candidate]
             id = player_path.split('-')[1][:-6]
-            if type_path == 'candidate_criteria':
+            if data_type == 0:
                 id = int(id) + 1
             alpha = player_path.split('-')[2].split('_')[0]
-            beta = player_path.split('-')[3]
-            n_initial_value = len(os.listdir(f'./simulation_data/{path}/{type_path}/{player_path}'))
+            beta = player_path.split('-')[3].split('_')[0]
+            max_gain = player_path.split('-')[4].split('_')[0]
+            max_loss = player_path.split('-')[5]
+            n_initial_value = len(os.listdir(f'{simulation_data_path}/{player_path}'))
 
             # Respectively compute each initial value
             for i in range(n_initial_value):
                 # Read file
-                initial_value_path = os.listdir(f'./simulation_data/{path}/{type_path}/{player_path}')[i]
+                initial_value_path = os.listdir(f'{simulation_data_path}/{player_path}')[i]
                 initial_value = initial_value_path.split('-')[1].split('.')[0]
-                data = pd.read_csv(f'./simulation_data/{path}/{type_path}/{player_path}/{initial_value_path}')['Trial']
-                data = list(data)
+                exp_data = pd.read_csv(f'{simulation_data_path}/{player_path}/{initial_value_path}')
+                current_initial_value_list = []
+
+                # Find out how many trials can players play
+                for simulation_num in range(n_simulation):
+                    run_data = exp_data[exp_data['Simulation'] == simulation_num]
+                    if [run_data.tail(1)['Win_or_lose']] == 'win':
+                        n_trial = run_data.shape[0]
+                    else:
+                        n_trial = run_data.shape[0] - 1
+                    current_initial_value_list.append(n_trial)
+
+                # Raise error message if the number of rows does not equal to n_simulation
+                if len(current_initial_value_list) != n_simulation:
+                    assert False, "The number of rows doesn't match the number of simulations "
 
                 # Count n_trials
                 n_trial_dict = {}
-                for i in range(9):
-                    n_trial_dict[i+1] = data.count(i+1)
+                for i in range(10):
+                    n_trial_dict[i] = current_initial_value_list.count(i)
 
                 # Caculate mean, median, mode and quantiles
-                mean = np.mean(data)
-                median = np.median(data)
-                mode = stats.mode(data)[0][0]
-                q1 = np.quantile(data, .25)
-                q3 = np.quantile(data, .75)
+                mean = np.mean(current_initial_value_list)
+                median = np.median(current_initial_value_list)
+                mode = stats.mode(current_initial_value_list)[0][0]
+                q1 = np.quantile(current_initial_value_list, .25)
+                q3 = np.quantile(current_initial_value_list, .75)
 
                 # Fill in the blank
-                result = result.append({
-                    'ID':id,
-                    'alpha':alpha,
-                    'beta':beta,
-                    'n_simulation':n_simulation,
-                    'initial_value':initial_value,
-                    'trial_1':n_trial_dict[1],
-                    'trial_2':n_trial_dict[2],
-                    'trial_3':n_trial_dict[3],
-                    'trial_4':n_trial_dict[4],
-                    'trial_5':n_trial_dict[5],
-                    'trial_6':n_trial_dict[6],
-                    'trial_7':n_trial_dict[7],
-                    'trial_8':n_trial_dict[8],
-                    'trial_9':n_trial_dict[9],
-                    'mean':mean,
-                    'median':median,
-                    'mode':mode,
-                    'Q1':q1,
-                    'Q3':q3
-                }, ignore_index = True)
+                current_player_df = pd.DataFrame({
+                    'ID':[id],
+                    'alpha':[alpha],
+                    'beta':[beta],
+                    'alpha - beta':[float(alpha) - float(beta)],
+                    'max_gain':[max_gain],
+                    'max_loss':[max_loss],
+                    'n_simulation':[n_simulation],
+                    'initial_value':[initial_value],
+                    'trial_0':[n_trial_dict[0]],
+                    'trial_1':[n_trial_dict[1]],
+                    'trial_2':[n_trial_dict[2]],
+                    'trial_3':[n_trial_dict[3]],
+                    'trial_4':[n_trial_dict[4]],
+                    'trial_5':[n_trial_dict[5]],
+                    'trial_6':[n_trial_dict[6]],
+                    'trial_7':[n_trial_dict[7]],
+                    'trial_8':[n_trial_dict[8]],
+                    'trial_9':[n_trial_dict[9]],
+                    'mean':[mean],
+                    'median':[median],
+                    'mode':[mode],
+                    'Q1':[q1],
+                    'Q3':[q3]
+                })
+                result = pd.concat([result, current_player_df], ignore_index = True)
 
         # Store the result after the final candidate
-        result_path = f'./data_analysis_result/{path}_{type_path}_analysis_result.csv'
+        result_path = f'./data_analysis_result/{data_type_dic[data_type]}_{chip_setting_dic[chip_setting]}_analysis_result.csv'
         result.to_csv(result_path, index = False)
 
-        print(f'The analysis of {type_path} is done!')
+        print(f'The analysis of {data_type_dic[data_type]}*{chip_setting_dic[chip_setting]} is done!')

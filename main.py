@@ -47,16 +47,14 @@ def single_run_experiment(candidate):
             'Chip':[],
             'Incentive':[],
         })
-        another_run_df = pd.DataFrame({
-            'Simulation':[],
-            'Trial':[]
-        })
 
         for simulation in range(n_simulation):
             # Create the game and the player
             alpha = round(data.at[candidate, 'alpha'], 3)
             beta = round(data.at[candidate, 'beta'], 3)
-            player = Player(alpha, beta)
+            max_gain = data.at[candidate, "max_gain"]
+            max_loss = -1*data.at[candidate, "max_loss"]
+            player = Player(alpha, beta, max_gain, max_loss)
             if less_initial_chip_amount:
                 game = Game(exp_type = 1, single_run = run_num, initial_chip_ratio = 1)
             else:
@@ -78,32 +76,25 @@ def single_run_experiment(candidate):
             game_result.insert(0, column = 'Simulation', value = [simulation for i in range(n_index)])
             run_df = pd.concat([run_df, game_result], ignore_index = True)
 
-            # Test
-            [index_of_last_trial] = game_result.tail(1)['Trial']
-
-            if [game_result.tail(1)['Win_or_lose']] == 'win':
-                trial_num = index_of_last_trial
-            else:  # Quit the run by running out of chips
-                trial_num = index_of_last_trial - 1
-
-            another_run_df = another_run_df.append({
-                'Simulation':simulation,
-                'Trial':trial_num
-            }, ignore_index = True)
-
-
         # Save data
         if data_type == 0:
-            folder_path = f'./simulation_data/candidate_criteria/player-{candidate}_alpha-{alpha}_beta-{beta}'
+            folder_1 = 'candidate_criteria'
+            player_id = candidate
         else:
-            folder_path = f'./simulation_data/real_subject/player-{subject_list[candidate]}_alpha-{alpha}_beta-{beta}'
-
+            folder_1 = 'real_subject'
+            player_id = subject_list[candidate]
+        if less_initial_chip_amount:
+            folder_2 = 'less_initial_chip'
+        else:
+            folder_2 = 'more_initial_chip'
+        
+        # Decide the storage path
+            folder_path = f'./simulation_data/{folder_1}/{folder_2}/player-{player_id}_alpha-{alpha}_beta-{beta}_max_gain-{max_gain}_max_loss-{max_loss}'
         if not os.path.isdir(folder_path):
             os.makedirs(folder_path)  # Make directory if the directory is not found
+            
         file_path = folder_path + f'/initial_value-{initial_value}.csv'
         run_df.to_csv(file_path, index = False)
-        another_file_path = f'{folder_path}/previous_format_initial_value-{initial_value}.csv'
-        another_run_df.to_csv(another_file_path, index = False)
     print(f'Candidate {candidate} is done!')
 
 # Set up
@@ -114,6 +105,7 @@ data_type_dic = {'criteria':0, 'real_subject':1}
 exp_type = exp_type_dic['single_run_experiment']  # Choose to simulate the whole experiment, just one run or 
 data_type = data_type_dic['real_subject']  # Choose whether the alpha and beta come from real subject or be made up by "candidate_criteria.py"
 less_initial_chip_amount = False  # Let true denote that the initial chip in every run is as many as initial gain
+consider_maximum = True  # Let true denote consider max gain and max loss
 
 # Read candidate data
 if data_type == 0:  # Choose "criteria"

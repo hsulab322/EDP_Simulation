@@ -4,7 +4,7 @@ import random
  
 class Game:
     # Game's attributes
-    def __init__(self, base_value = 200, initial_chip_ratio = 2, exp_type = 0, single_run = 0):
+    def __init__(self, base_value = 200, initial_chip_ratio = 2, exp_type = 0, single_run = 0, consider_maximum = False):
         self.__base_value = base_value
         self.__initial_value_list = [self.__base_value + 100*i for i in range(0, 6)]*2
         self.__ratio_list = (0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5)
@@ -12,6 +12,7 @@ class Game:
         self.__n_trial = len(self.__ratio_list)
         self.__exp_type = exp_type
         self.__single_run = single_run
+        self.__consider_maximum = consider_maximum
         self.__run_list = list()
         self.__conflict = bool()
         self.__current_run = int()
@@ -59,12 +60,21 @@ class Game:
             self.__n_run = 1
 
     # Compute loss outcome
-    def __compute_loss_outcome(self, player):
+    # Consider subjects' max gain and max loss
+    def __compute_loss_outcome_consider_maximum(self, player):
         __player_attributes_list = player.get_utility_parameters()
         __ratio = self.__ratio_list[self.__current_trial]
         self.__current_gain_utility = (self.__current_gain_outcome / __player_attributes_list[2])**__player_attributes_list[0]
         self.__current_loss_utility = self.__current_gain_utility * __ratio
         __loss_outcome = round(-1 * __player_attributes_list[3] * self.__current_loss_utility **(1/__player_attributes_list[1]))
+        return __loss_outcome
+    # Ignore subjects' max gain and max loss
+    def __compute_loss_outcome_ignore_maximum(self, player):
+        __player_attributes_list = player.get_utility_parameters()
+        __ratio = self.__ratio_list[self.__current_trial]
+        self.__current_gain_utility = (self.__current_gain_outcome)**__player_attributes_list[0]
+        self.__current_loss_utility = self.__current_gain_utility * __ratio
+        __loss_outcome = round(-1 * self.__current_loss_utility **(1/__player_attributes_list[1]))
         return __loss_outcome
 
     # Start the game
@@ -74,12 +84,18 @@ class Game:
             __random_run_index = self.__run_list[self.__current_run]
             __initial_value = self.__initial_value_list[__random_run_index]
             self.__current_gain_outcome = __initial_value
-            self.__current_loss_outcome = self.__compute_loss_outcome(player)
+            if self.__consider_maximum:
+                self.__current_loss_outcome = self.__compute_loss_outcome_consider_maximum(player)
+            else:
+                self.__current_loss_outcome = self.__compute_loss_outcome_ignore_maximum(player)
             player.change_current_incentive(None)
             player.change_current_chip(self.__current_gain_outcome*self.__initial_chip_ratio)  # initial chip: equals to initial value
         else:
             self.__current_gain_outcome = round(player.get_current_chip()*0.5 + self.__current_gain_outcome)
-            self.__current_loss_outcome = self.__compute_loss_outcome(player)
+            if self.__consider_maximum:
+                self.__current_loss_outcome = self.__compute_loss_outcome_consider_maximum(player)
+            else:
+                self.__current_loss_outcome = self.__compute_loss_outcome_ignore_maximum(player)
 
         # See if the lottery induce conflict
         self.__check_conflict(player)
