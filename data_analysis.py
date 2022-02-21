@@ -10,9 +10,9 @@ data_type_dic = {0:"candidate_criteria", 1:"real_subject"}
 chip_setting_dic = {0:"more_initial_chip", 1:"less_initial_chip"}
 
 # Run two types of data
-for chip_setting in range(2):
-    for data_type in range(2):
-        simulation_data_path = f'./simulation_data/{data_type_dic[data_type]}/{chip_setting_dic[chip_setting]}'
+for chip_setting in range(1):
+    for data_type in range(1, 2):
+        simulation_data_path = f'./simulation_data/consider_maximum/{chip_setting_dic[chip_setting]}'
         n_candidate = len(os.listdir(simulation_data_path))
 
         for candidate in range(n_candidate):
@@ -41,7 +41,11 @@ for chip_setting in range(2):
                     'median':[],
                     'mode':[],
                     'Q1':[],
-                    'Q3':[]
+                    'Q3':[],
+                    'lottery_6_num':[],
+                    'lottery_6_mean_difference':[],
+                    'lottery_8_num':[],
+                    'lottery_8_mean_difference':[]
                 })
 
             # Get alpha & beta from the folder
@@ -62,6 +66,26 @@ for chip_setting in range(2):
                 initial_value = initial_value_path.split('-')[1].split('.')[0]
                 exp_data = pd.read_csv(f'{simulation_data_path}/{player_path}/{initial_value_path}')
                 current_initial_value_list = []
+                lottery_6_num = lottery_8_num = 0
+                lottery_6_mean_difference = lottery_8_mean_difference = 0
+
+                # Compute mean difference between gain-outcome and loss-outcome at lottery 6 & 8
+                for lottery_index in [5, 7]:
+                    lottery = exp_data[exp_data["Trial"] == lottery_index]
+                    lottery_num = len(lottery)
+                    lottery.index = range(lottery_num)
+                    lottery_diff_list = []
+                    for trial_index in range(lottery_num):
+                        gain = float(lottery.at[trial_index, "Gain_outcome"])
+                        loss = float(lottery.at[trial_index, "Loss_outcome"])
+                        lottery_diff_list.append(abs(gain + loss))
+                    lottery_mean_difference = np.mean(lottery_diff_list)
+                    if lottery_index == 5:
+                        lottery_6_num = int(lottery_num)
+                        lottery_6_mean_difference = lottery_mean_difference
+                    else:
+                        lottery_8_num = int(lottery_num)
+                        lottery_8_mean_difference = lottery_mean_difference
 
                 # Find out how many trials can players play
                 for simulation_num in range(n_simulation):
@@ -112,12 +136,16 @@ for chip_setting in range(2):
                     'median':[median],
                     'mode':[mode],
                     'Q1':[q1],
-                    'Q3':[q3]
+                    'Q3':[q3],
+                    'lottery_6_num':[lottery_6_num],
+                    'lottery_6_mean_difference':[lottery_6_mean_difference],
+                    'lottery_8_num':[lottery_8_num],
+                    'lottery_8_mean_difference':[lottery_8_mean_difference]
                 })
                 result = pd.concat([result, current_player_df], ignore_index = True)
 
         # Store the result after the final candidate
-        result_path = f'./data_analysis_result/{data_type_dic[data_type]}_{chip_setting_dic[chip_setting]}_analysis_result.csv'
+        result_path = f'./data_analysis_result/{data_type_dic[data_type]}_{chip_setting_dic[chip_setting]}_analysis_result_new.csv'
         result.to_csv(result_path, index = False)
 
         print(f'The analysis of {data_type_dic[data_type]}*{chip_setting_dic[chip_setting]} is done!')
